@@ -1,0 +1,47 @@
+{
+  "namespace": "beycandeveloper",
+  "name": "@beycandeveloper/multi-chain",
+  "version": "1.0.0",
+  "description": "A library that allows you to easily connect and transact with many blockchain networks and wallets.",
+  "main": "index.js",
+  "keywords": [
+    "Blockchain",
+    "Ethereum token transfer",
+    "Binance smart chain",
+    "Cryptocurrency payment"
+  ],
+  "authors": [
+    {
+      "name": "Halil Beycan",
+      "email": "halilbeycan0@gmail.com",
+      "url": "https://github.com/BeycanDeveloper"
+    }
+  ],
+  "license": "LGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BeycanDeveloper/multi-chain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BeycanDeveloper/multi-chain"
+  },
+  "homepage": "https://github.com/BeycanDeveloper/multi-chain",
+  "scripts": {
+    "serve": "webpack-dev-server"
+  },
+  "dependencies": {
+    "abi-decoder": "^2.4.0",
+    "assert": "^2.0.0",
+    "axios": "^0.24.0",
+    "bignumber.js": "^9.0.1",
+    "buffer": "^6.0.3",
+    "web3": "^0.20.5"
+  },
+  "devDependencies": {
+    "process": "^0.11.10",
+    "stream": "0.0.2",
+    "webpack": "^5.64.1",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.5.0"
+  }
+}

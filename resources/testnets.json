@@ -1,0 +1,68 @@
+{
+    "0x3": {
+        "id": 3,
+        "hexId": "0x3",
+        "name": "Ethereum Ropsten Testnet",
+        "rpcUrl": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "explorerUrl": "https://ropsten.etherscan.io/",
+        "nativeCurrency": {
+            "symbol" : "ETH",
+            "decimals" : 18
+        },
+        "currencies": [
+            "ETH",
+            "0x110a13fc3efe6a245b50102d2d79b3e76125ae83",
+            "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
+            "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
+            "0x5becea798b2565a0ff0812e7c67f2700e43b4966"
+        ]
+    },
+    "0x61": {
+        "id": 97,
+        "hexId": "0x61",
+        "name": "Binance Smart Chain Testnet",
+        "rpcUrl": "https://data-seed-prebsc-1-s1.binance.org:8545/",
+        "explorerUrl": "https://testnet.bscscan.com/",
+        "nativeCurrency": {
+            "symbol" : "BNB",
+            "decimals" : 18
+        },
+        "currencies": [
+            "BNB",
+            "0xba6670261a05b8504e8ab9c45d97a8ed42573822",
+            "0x64544969ed7ebf5f083679233325356ebe738930",
+            "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee",
+            "0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378"
+        ]
+    },
+    "0xa869": {
+        "id": 43113,
+        "hexId": "0xa869",
+        "name": "Avalanche FUJI C-Chain Testnet",
+        "rpcUrl": "https://api.avax-test.network/ext/bc/C/rpc",
+        "explorerUrl": "https://cchain.explorer.avax-test.network",
+        "nativeCurrency": {
+            "symbol" : "AVAX",
+            "decimals" : 18
+        },
+        "currencies": [
+            "AVAX",
+            "0xfe143522938e253e5feef14db0732e9d96221d72"
+        ]
+    },
+    "0x13881": {
+        "id": 80001,
+        "hexId": "0x13881",
+        "name": "Polygon Mumbai Testnet",
+        "rpcUrl": "https://rpc-mumbai.matic.today",
+        "explorerUrl": "https://mumbai.polygonscan.com/",
+        "nativeCurrency": {
+            "symbol" : "MATIC",
+            "decimals" : 18
+        },
+        "currencies": [
+            "MATIC",
+            "0xa02f6adc7926efebbd59fd43a84f4e0c0c91e832"
+        ]
+    }
+}

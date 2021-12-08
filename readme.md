@@ -1,1 +1,1 @@
-npm install @beycan/multi-chain
+npm install @beycandeveloper/multi-chain

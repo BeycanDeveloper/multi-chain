@@ -12,8 +12,7 @@ multiChain = new MultiChain({
 (async () => {
     await multiChain.connect('metamask');
     
-    let token = multiChain.token('0xba6670261a05b8504e8ab9c45d97a8ed42573822');
+    let coin = multiChain.coin();
 
-    console.log(await token.getBalance("0x74dBE9cA4F93087A27f23164d4367b8ce66C33e2"))
-    console.log(await token.method('name'));
+    console.log(await coin.transfer("0x3BFC285D60F79258D999a669B98aD8662c6277b5", 0.001))
 })();

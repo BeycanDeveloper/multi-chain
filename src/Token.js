@@ -145,15 +145,12 @@ class Token {
     
             let data = this.contract.transfer.getData(to, amount, {from: this.multiChain.connectedAccount});
     
-            this.multiChain.provider.request({
-                method: 'eth_sendTransaction',
-                params: [{
-                    to: this.address,
-                    from: this.multiChain.connectedAccount,
-                    value: '0x0',
-                    data
-                }],
-            })
+            this.multiChain.provider.sendTransaction([{
+                to: this.address,
+                from: this.multiChain.connectedAccount,
+                value: '0x0',
+                data
+            }])
             .then((transactionId) => {
                 resolve(transactionId);
             })

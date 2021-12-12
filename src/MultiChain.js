@@ -224,9 +224,25 @@ class MultiChain {
     /**
      * @param {String} address 
      * @param {Array} abi 
+     * @return {Token}
      */
     token(address, abi = null) {
         return new Token(address, this, abi);
+    }
+
+    /**
+     * @return {Coin}
+     */
+    coin() {
+        return new Coin(this);
+    }
+
+    /**
+     * @param {String} transactionId 
+     * @return {Transaction}
+     */
+    transaction(transactionId) {
+        return new Transaction(transactionId, this)
     }
 
     /**
@@ -320,9 +336,6 @@ class MultiChain {
     }
 }
 
-MultiChain.Coin = Coin;
-MultiChain.Token = Token;
-MultiChain.Transaction = Transaction;
 MultiChain.CurrencyConverter = CurrencyConverter;
 
 if (typeof window != 'undefined') {

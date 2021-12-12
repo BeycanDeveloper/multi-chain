@@ -1,20 +1,19 @@
 {
-    "0x3": {
-        "id": 3,
-        "hexId": "0x3",
-        "name": "Ethereum Ropsten Testnet",
-        "rpcUrl": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-        "explorerUrl": "https://ropsten.etherscan.io/",
+    "0x4": {
+        "id": 4,
+        "hexId": "0x4",
+        "name": "Ethereum Rinkeby Testnet",
+        "rpcUrl": "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "explorerUrl": "https://rinkeby.etherscan.io/",
         "nativeCurrency": {
             "symbol" : "ETH",
             "decimals" : 18
         },
         "currencies": [
             "ETH",
-            "0x110a13fc3efe6a245b50102d2d79b3e76125ae83",
-            "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
-            "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
-            "0x5becea798b2565a0ff0812e7c67f2700e43b4966"
+            "0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02",
+            "0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b",
+            "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa"
         ]
     },
     "0x61": {

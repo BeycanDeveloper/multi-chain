@@ -57,14 +57,11 @@ class Coin {
                 return reject('insufficient-balance');
             }
 
-            this.multiChain.provider.request({
-                method: 'eth_sendTransaction',
-                params: [{
-                    to,
-                    from: this.multiChain.connectedAccount,
-                    value: Utils.toHex(amount, this.decimals)
-                }],
-            })
+            this.multiChain.provider.sendTransaction([{
+                to,
+                from: this.multiChain.connectedAccount,
+                value: Utils.toHex(amount, this.decimals)
+            }])
             .then((transactionId) => {
                 resolve(transactionId);
             })

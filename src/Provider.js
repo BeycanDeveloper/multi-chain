@@ -52,16 +52,46 @@ class Provider {
         });
     };
 
+    /**
+     * 
+     * @param {Object} params 
+     * @return {Promise}
+     */
     request(params) {
         return this.instance.request(params);
     }
 
+    /**
+     * @param {Array} params 
+     * @returns 
+     */
+    sendTransaction(params) {
+        return new Promise(async (resolve, reject) => {
+            this.instance.request({
+                method: 'eth_sendTransaction',
+                params,
+            })
+            .then((transactionId) => {
+                resolve(transactionId);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+        });
+    }
+
+    /**
+     * @param {CallableFunction} callback 
+     */
     chainChanged(callback) {
         this.instance.on('chainChanged', (chainHexId) => {
             callback(chainHexId);
         });
     }
-    
+
+    /**
+     * @param {CallableFunction} callback 
+     */
     accountsChanged(callback) {
         this.instance.on('accountsChanged', (accounts) => {
             callback(accounts);

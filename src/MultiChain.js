@@ -16,7 +16,7 @@ class MultiChain {
 
     /**
      * Web3 library instance
-     * @var {Provider}
+     * @var {Web3}
      */
     web3;
 
@@ -94,21 +94,6 @@ class MultiChain {
      * @var {CurrencyConverter}
      */
     static CurrencyConverter;
-
-    /**
-     * @var {Transaction}
-     */
-    static Transaction;
-
-    /**
-     * @var {Coin}
-     */
-    static Coin;
-
-    /**
-     * @var {Token}
-     */
-    static Token;
 
     /**
      * @param {Object} config 
@@ -219,6 +204,15 @@ class MultiChain {
                 reject(error);
             });
         });
+    }
+
+    /**
+     * @param {String} address 
+     * @param {Array} abi 
+     * @return {Object}
+     */
+    contract(address, abi) {
+        return this.web3.eth.contract(abi).at(address);
     }
 
     /**

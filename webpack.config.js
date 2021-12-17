@@ -1,6 +1,9 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const wpdir = "C:/wamp64/www/projects/wp-development/products/wp-content/plugins/cryptopay-woocommerce/assets/js";
+const dist = path.join(__dirname, "/dist");
+
 let env = 'prod';
 
 let dev = {
@@ -10,14 +13,15 @@ let dev = {
         path: path.resolve(__dirname, 'test'),
         filename: 'test.js',
     },
-    watch: true
+    watch: true,
+    devtool: "source-map"
 };
 
 let prod = {
     mode: 'production',
     entry: './index.js',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: wpdir,
         filename: 'multi-chain.min.js',
     }
 };
@@ -30,6 +34,5 @@ module.exports = Object.assign(env == 'prod' ? prod : dev, {
         new webpack.ProvidePlugin({
             process: 'process/browser',
         }),
-    ],
-    devtool: "source-map"
+    ]
 });

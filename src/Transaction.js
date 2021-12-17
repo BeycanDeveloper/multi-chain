@@ -3,6 +3,9 @@ const Token = require('./Token');
 const Utils = require('./Utils');
 const Web3Utils = require('web3-utils');
 const MultiChain = require('./MultiChain');
+const abiDecoder = require('abi-decoder');
+const ABI = require('../resources/abi.json');
+abiDecoder.addABI(ABI);
 
 class Transaction {
 
@@ -30,8 +33,6 @@ class Transaction {
 
         this.multiChain = multiChain;
         this.id = transactionId;
-
-        this.getDataFromExplorer();
     }
 
     async getDataFromExplorer() {
@@ -40,6 +41,16 @@ class Transaction {
                 method: 'eth_getTransactionByHash',
                 params: [this.id]
             });
+        } catch (error) {
+            throw new Error('There was a problem retrieving transaction data!');
+        }
+
+        try {
+            let result = await this.multiChain.provider.request({
+                method: 'eth_getTransactionReceipt',
+                params: [this.id]
+            });
+            this.data.status = result.status;
         } catch (error) {
             throw new Error('There was a problem retrieving transaction data!');
         }
@@ -64,7 +75,7 @@ class Transaction {
      */
     decodeInput() {
         if (this.data.input != '0x') {
-            let decodedInput = abiDecoder.decodeMethod(this.data.input);
+            let decodedInput = Utils.abiDecoder(this.data.input);
             let receiver = decodedInput.params[0].value;
             let amount = decodedInput.params[1].value;
             return { receiver, amount };
@@ -80,12 +91,19 @@ class Transaction {
      */
     verify(tokenAddress = null, timer = 1) {
         
-        if (tokenAddress && Web3Utils.isAddress(to) === false) {
-            throw new Error('Invalid receiver address!');
+        if (tokenAddress == this.multiChain.activeChain.nativeCurrency.symbol) {
+            tokenAddress = null;
+        }
+
+        if (tokenAddress && Web3Utils.isAddress(tokenAddress) === false) {
+            throw new Error('Invalid token address!');
         }
 
         return new Promise((resolve, reject) => {
+            let timeOut = 15;
+            let time = 0;
             let checkerInterval = setInterval(async () => {
+                time ++;
                 try {
 
                     await this.getDataFromExplorer();
@@ -96,7 +114,9 @@ class Transaction {
                         result = 'failed';
                     } else {
                         if (this.data.blockNumber !== null) {
-                            if (tokenAddress && this.data.input == '0x') {
+                            if (this.data.status == '0x0') {
+                                result = 'failed';
+                            } else if (tokenAddress && this.data.input == '0x') {
                                 result = 'failed';
                             } else if (!tokenAddress && this.data.value == '0x0') {
                                 result = 'failed';
@@ -116,8 +136,17 @@ class Transaction {
                     }
     
                 } catch (error) {
-                    clearInterval(checkerInterval);
-                    reject(error);
+                    if (time == timeOut) {
+                        clearInterval(checkerInterval);
+                        reject(error);
+                    } else {
+                        if (error.message == 'There was a problem retrieving transaction data!') {
+                            this.verify(tokenAddress, timer);
+                        } else {
+                            clearInterval(checkerInterval);
+                            reject(error);
+                        }
+                    }
                 }
             }, (timer*1000));
         });
@@ -130,6 +159,19 @@ class Transaction {
      * @returns {String}
      */
     async verifyData(receiver, amount, tokenAddress = null) {
+
+        if (tokenAddress == this.multiChain.activeChain.nativeCurrency.symbol) {
+            tokenAddress = null;
+        }
+
+        if (tokenAddress && Web3Utils.isAddress(tokenAddress) === false) {
+            throw new Error('Invalid token address!');
+        }
+
+        if (Web3Utils.isAddress(receiver) === false) {
+            throw new Error('Invalid receiver address!');
+        }
+
         receiver = receiver.toLowerCase();
         if (!tokenAddress) {
 
@@ -178,11 +220,22 @@ class Transaction {
                     reject('failed');
                 }
             })
-            .catch(() => {
+            .catch((e) => {
                 reject('failed');
             });
         });
-    };
+    }
+
+    /**
+     * @param {String} receiver
+     * @returns {String}
+     */
+    getTransactionUrl() {
+        let explorerUrl = this.multiChain.activeChain.explorerUrl;
+        explorerUrl += explorerUrl.endsWith('/') ? '' : '/';
+        explorerUrl += 'tx/'+this.id;
+        return explorerUrl;
+    }
 
 }
 

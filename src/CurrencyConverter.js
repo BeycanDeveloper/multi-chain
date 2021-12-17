@@ -18,12 +18,24 @@ class CurrencyConverter {
     apiKey = null;
 
     /**
-     * @var array
+     * @var {Object}
      */
     apis = {
         'cryptocompare': 'https://min-api.cryptocompare.com/data/price',
         'coinmarketcap': 'https://pro-api.coinmarketcap.com/v1/tools/price-conversion'
     };
+
+    /**
+     * @var {Array}
+     */
+    stableCoins = [
+        'USDT',
+        'USDC',
+        'DAI',
+        'BUSD',
+        'UST',
+        'TUSD'
+    ];
 
     /**
      * @param {String} api
@@ -97,6 +109,13 @@ class CurrencyConverter {
      * @throws {Error}
      */
     async convertWithCryptoCompare(from, to, amount) {
+
+        if (from.toLocaleUpperCase() == 'USD' || to.toLocaleUpperCase() == 'USD') {
+            if (this.stableCoins.includes(from.toLocaleUpperCase()) || this.stableCoins.includes(to.toLocaleUpperCase())) {
+                return amount;
+            }
+        }
+
         this.checkUsedApi('cryptocompare');
 
         let apiUrl = this.apiUrl + '?fsym=' + from + '&tsyms=' + to;
@@ -123,6 +142,13 @@ class CurrencyConverter {
                 throw new Error("The key of the api selected to be used has not been entered.");
             }
         }
+    }
+
+    /**
+     * @param {Array} symbols
+     */
+    addStableCoins(symbols) {
+        this.stableCoins = stableCoins.concat(symbols);
     }
 
 }

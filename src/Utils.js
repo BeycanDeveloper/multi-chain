@@ -42,6 +42,14 @@ class Utils {
             throw new Error('No active chain was found, please select a chain first.');
         }
     }
+
+    /**
+     * @param {String} input
+     * @return {Object}
+     */
+    static abiDecoder(input) {
+        return abiDecoder.decodeMethod(input);
+    }
 }
 
 module.exports = Utils;

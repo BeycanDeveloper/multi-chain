@@ -82,7 +82,7 @@ class MultiChain {
      * Wallet that the user is connecting to
      * @var {Wallet}
      */
-    activeWallet = {};
+    connectedWallet = {};
 
     /**
      * Connected wallet address
@@ -117,7 +117,7 @@ class MultiChain {
         }
 
         if (config.acceptedWallets != undefined) {
-            this.acceptedWallets = config.acceptedWallets;
+            this.acceptedWallets = config.acceptedWallets.filter(val => this.wallets[val]);
         }
 
         this.detectWallets();
@@ -146,7 +146,7 @@ class MultiChain {
                 currencyAddress = null;
             }
 
-            if (!currencyAddress) {
+            if (!currencyAddress || currencyAddress == this.activeChain.nativeCurrency.symbol) {
                 this.coinTransfer(to, amount)
                 .then((transaction) => {
                     resolve(transaction);
@@ -290,7 +290,7 @@ class MultiChain {
                 .then(accounts => {
 
                     this.connectedAccount = accounts[0];
-                    this.activeWallet = this.wallets[wallet];
+                    this.connectedWallet = this.wallets[wallet];
                     this.activeChain = this.acceptedChains[chainHexId];
 
                     this.provider.chainChanged(() => {

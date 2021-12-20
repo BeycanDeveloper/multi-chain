@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const Coin = require('./Coin');
 const Token = require('./Token');
-const Provider = require('./Provider');
+const Connector = require('./Connector');
 const Web3Utils = require('web3-utils');
 const Transaction = require('./Transaction');
 const CurrencyConverter = require('./CurrencyConverter');
@@ -9,16 +9,28 @@ const CurrencyConverter = require('./CurrencyConverter');
 class MultiChain {
 
     /**
-     * Provider to interact with the wallet
-     * @var {Provider}
+     * Connector to interact with the wallet
+     * @var {Connector}
      */
-    provider;
+    connector;
 
     /**
      * Web3 library instance
      * @var {Web3}
      */
     web3;
+
+    /**
+     * Infura id for WalletConnect
+     * @var {string}
+     */
+    infuraId;
+
+    /**
+     * Rpc url chain id mapping
+     * @var {Object}
+     */
+    rpcIdMapping = {};
 
     /**
      * Blockchain networks that can be considered as a payment method.
@@ -36,7 +48,9 @@ class MultiChain {
      * Detected wallets
      * @var {Array}
      */
-    detectedWallets = [];
+    detectedWallets = [
+        'walletconnect'
+    ];
 
     /**
      * Accepted wallets
@@ -63,12 +77,10 @@ class MultiChain {
             name: 'Binance Wallet'
         },
         walletconnect: {
-            name: 'WalletConnect',
-            qrConnection: true
+            name: 'WalletConnect'
         },
         coinbasewallet: {
-            name: 'Coinbase Wallet',
-            qrConnection: true
+            name: 'Coinbase Wallet'
         },
         coin98wallet: {
             name: 'Coin98 Wallet'
@@ -116,9 +128,25 @@ class MultiChain {
             this.acceptedChains = config.acceptedChains;
         }
 
+        let acceptedChains = {};
+        Object.entries(this.acceptedChains).forEach((val) => {
+            let currencies = [];
+            Object.entries(val[1].currencies).forEach((val) => {
+                currencies.push(val[1].toUpperCase());
+            });
+            acceptedChains[val[0]] = Object.assign(val[1], {currencies});
+        });
+        this.acceptedChains = acceptedChains;
+
         if (config.acceptedWallets != undefined) {
             this.acceptedWallets = config.acceptedWallets.filter(val => this.wallets[val]);
         }
+
+        this.infuraId = config.infuraId;
+
+        Object.entries(this.acceptedChains).forEach((val) => {
+            this.rpcIdMapping[val[1].id] = val[1].rpcUrl;
+        });
 
         this.detectWallets();
     }
@@ -137,7 +165,7 @@ class MultiChain {
                 return reject('currency-is-not-accepted');
             }
 
-            let chainHexId = await this.provider.getChainHexId();
+            let chainHexId = await this.connector.getChainHexId();
             if (this.activeChain.hexId != chainHexId) {
                 return reject('chain-changed');
             }
@@ -272,42 +300,51 @@ class MultiChain {
      * @returns {String|Object}
      */
     connect(wallet) {
-
-        this.provider = new Provider(wallet);
-        this.web3 = new Web3(this.provider.instance);
-
         return new Promise(async (resolve, reject) => {
         
-            if (!this.wallets[wallet] || !this.detectedWallets.includes(wallet)) {
-                reject('not-accepted-wallet');
+            if (!this.wallets[wallet] || !this.acceptedWallets.includes(wallet)) {
+                return reject('not-accepted-wallet');
             }
 
-            let chainHexId = await this.provider.getChainHexId();
+            if (!this.detectedWallets.includes(wallet)) {
+                return reject('wallet-not-detected');
+            }
 
-            if (this.acceptedChains[chainHexId]) {
+            try {
+                this.connector = new Connector(wallet, this);
+                this.web3 = new Web3(this.connector.provider);
+            } catch (error) {
+                return reject(error.message);
+            }
 
-                this.provider.connect()
-                .then(accounts => {
-
+            this.connector.connect()
+            .then(async accounts => {
+                let chainHexId = await this.connector.getChainHexId();
+                if (this.acceptedChains[chainHexId]) {
                     this.connectedAccount = accounts[0];
                     this.connectedWallet = this.wallets[wallet];
                     this.activeChain = this.acceptedChains[chainHexId];
-
-                    this.provider.chainChanged(() => {
-                        window.location.reload();
-                    });
-                    this.provider.accountsChanged(() => {
+    
+                    this.connector.chainChanged(() => {
                         window.location.reload();
                     });
 
+                    this.connector.accountsChanged(() => {
+                        window.location.reload();
+                    });
+
+                    this.connector.disconnectEvent(() => {
+                        window.location.reload();
+                    });
+    
                     resolve(this.connectedAccount);
-                })
-                .catch(error => {
-                    reject(error);
-                });
-            } else {
-                reject('not-accepted-chain');
-            }
+                } else {
+                    reject('not-accepted-chain');
+                }
+            })
+            .catch(error => {
+                reject(error);
+            });
         });
     }
     

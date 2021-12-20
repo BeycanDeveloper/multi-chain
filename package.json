@@ -1,7 +1,7 @@
 {
   "namespace": "beycandeveloper",
   "name": "@beycandeveloper/multi-chain",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A library that allows you to easily connect and transact with many blockchain networks and wallets.",
   "main": "index.js",
   "keywords": [
@@ -30,16 +30,18 @@
     "serve": "webpack-dev-server"
   },
   "dependencies": {
+    "@walletconnect/web3-provider": "^1.7.0",
     "abi-decoder": "^2.4.0",
     "assert": "^2.0.0",
     "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
     "buffer": "^6.0.3",
+    "os": "^0.1.2",
     "web3": "0.20.5"
   },
   "devDependencies": {
     "process": "^0.11.10",
-    "stream": "0.0.2",
+    "stream": "^0.0.2",
     "webpack": "^5.64.1",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.5.0"

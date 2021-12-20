@@ -38,7 +38,7 @@ class Coin {
      * @returns {Float}
      */
     async getBalance(address) {
-        let balance = await this.multiChain.provider.request({
+        let balance = await this.multiChain.connector.request({
             method: 'eth_getBalance', 
             params: [address, 'latest']
         });
@@ -57,7 +57,7 @@ class Coin {
                 return reject('insufficient-balance');
             }
 
-            this.multiChain.provider.sendTransaction([{
+            this.multiChain.connector.sendTransaction([{
                 to,
                 from: this.multiChain.connectedAccount,
                 value: Utils.toHex(amount, this.decimals)

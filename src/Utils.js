@@ -50,6 +50,15 @@ class Utils {
     static abiDecoder(input) {
         return abiDecoder.decodeMethod(input);
     }
+
+    /**
+     * @param {String|Number} val
+     * @return {Boolean}
+     */
+    static isNumeric(val) {
+        if (typeof val != "string") return true;
+        return isNaN(val) && isNaN(parseFloat(val));
+    }
 }
 
 module.exports = Utils;

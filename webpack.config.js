@@ -21,7 +21,7 @@ let prod = {
     mode: 'production',
     entry: './index.js',
     output: {
-        path: wpdir,
+        path: dist,
         filename: 'multi-chain.min.js',
     }
 };
@@ -34,5 +34,12 @@ module.exports = Object.assign(env == 'prod' ? prod : dev, {
         new webpack.ProvidePlugin({
             process: 'process/browser',
         }),
-    ]
+    ],
+    resolve: {
+        extensions: ["", ".js", ".jsx"],
+        fallback: {
+            http: false, 
+            https: false
+        }
+    }
 });

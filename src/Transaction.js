@@ -37,7 +37,7 @@ class Transaction {
 
     async getDataFromExplorer() {
         try {
-            this.data = await this.multiChain.provider.request({
+            this.data = await this.multiChain.connector.request({
                 method: 'eth_getTransactionByHash',
                 params: [this.id]
             });
@@ -46,7 +46,7 @@ class Transaction {
         }
 
         try {
-            let result = await this.multiChain.provider.request({
+            let result = await this.multiChain.connector.request({
                 method: 'eth_getTransactionReceipt',
                 params: [this.id]
             });
@@ -95,7 +95,7 @@ class Transaction {
             tokenAddress = null;
         }
 
-        if (tokenAddress && Web3Utils.isAddress(tokenAddress) === false) {
+        if (tokenAddress && Web3Utils.isAddress(tokenAddress = tokenAddress.toLowerCase()) === false) {
             throw new Error('Invalid token address!');
         }
 
@@ -164,15 +164,14 @@ class Transaction {
             tokenAddress = null;
         }
 
-        if (tokenAddress && Web3Utils.isAddress(tokenAddress) === false) {
+        if (tokenAddress && Web3Utils.isAddress(tokenAddress = tokenAddress.toLowerCase()) === false) {
             throw new Error('Invalid token address!');
         }
 
-        if (Web3Utils.isAddress(receiver) === false) {
+        if (Web3Utils.isAddress(receiver = receiver.toLowerCase()) === false) {
             throw new Error('Invalid receiver address!');
         }
 
-        receiver = receiver.toLowerCase();
         if (!tokenAddress) {
 
             let data = {

@@ -1,6 +1,7 @@
 const Web3 = require('web3');
 const Coin = require('./Coin');
 const Token = require('./Token');
+const Utils = require('./Utils');
 const Connector = require('./Connector');
 const Web3Utils = require('web3-utils');
 const Transaction = require('./Transaction');
@@ -108,6 +109,11 @@ class MultiChain {
     static CurrencyConverter;
 
     /**
+     * @var {Utils}
+     */
+    static Utils;
+
+    /**
      * @param {Object} config 
      */
     constructor(config) {
@@ -120,19 +126,21 @@ class MultiChain {
         }
 
         // Testnets
-        if (typeof config.testnets != 'undefined' && config.testnets == true) {
-            this.acceptedChains = require('../resources/testnets.json');
-        } else if (typeof config.mainnets != 'undefined' && config.mainnets == true) {
-            this.acceptedChains = require('../resources/mainnets.json');
-        } else {
+        if (typeof config.acceptedChains != 'undefined') {
             this.acceptedChains = config.acceptedChains;
+        } else {
+            if (typeof config.testnets != 'undefined' && config.testnets == true) {
+                this.acceptedChains = require('../resources/testnets.json');
+            } else if (typeof config.mainnets != 'undefined' && config.mainnets == true) {
+                this.acceptedChains = require('../resources/mainnets.json');
+            }
         }
 
         let acceptedChains = {};
         Object.entries(this.acceptedChains).forEach((val) => {
             let currencies = [];
             Object.entries(val[1].currencies).forEach((val) => {
-                currencies.push(val[1].toUpperCase());
+                currencies.push(Utils.isAddress(val[1]) ? val[1].toLowerCase() : val[1]);
             });
             acceptedChains[val[0]] = Object.assign(val[1], {currencies});
         });
@@ -205,13 +213,17 @@ class MultiChain {
     tokenTransfer(to, amount, tokenAddress) {
         this.validate(to, amount, tokenAddress);
         return new Promise((resolve, reject) => {
-            (new Token(tokenAddress, this)).transfer(to, amount)
-            .then((transactionId) => {
-                resolve(new Transaction(transactionId, this));
-            })
-            .catch((error) => {
+            try {
+                (new Token(tokenAddress, this)).transfer(to, amount)
+                .then((transactionId) => {
+                    resolve(new Transaction(transactionId, this));
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+            } catch (error) {
                 reject(error);
-            });
+            }
         });
     }
 
@@ -224,13 +236,17 @@ class MultiChain {
     coinTransfer(to, amount) {
         this.validate(to, amount);
         return new Promise((resolve, reject) => {
-            (new Coin(this)).transfer(to, amount)
-            .then((transactionId) => {
-                resolve(new Transaction(transactionId, this));
-            })
-            .catch((error) => {
+            try {
+                (new Coin(this)).transfer(to, amount)
+                .then((transactionId) => {
+                    resolve(new Transaction(transactionId, this));
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+            } catch (error) {
                 reject(error);
-            });
+            }
         });
     }
 
@@ -368,6 +384,7 @@ class MultiChain {
 }
 
 MultiChain.CurrencyConverter = CurrencyConverter;
+MultiChain.Utils = Utils;
 
 if (typeof window != 'undefined') {
     window.MultiChain = MultiChain;

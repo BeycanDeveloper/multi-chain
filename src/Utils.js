@@ -7,6 +7,14 @@ abiDecoder.addABI(ABI);
 class Utils {
 
     /**
+     * @param value
+     * @returns {String}
+     */
+    static hex(value) {
+        return Web3Utils.toHex(value);
+    }
+
+    /**
      * @param {Float} amount 
      * @param {Integer} decimals 
      * @returns {String}
@@ -58,6 +66,14 @@ class Utils {
     static isNumeric(val) {
         if (typeof val != "string") return true;
         return isNaN(val) && isNaN(parseFloat(val));
+    }
+
+    /**
+     * @param {String} address
+     * @return {Boolean}
+     */
+    static isAddress(address) {
+        return Web3Utils.isAddress(address);
     }
 }
 

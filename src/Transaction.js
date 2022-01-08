@@ -85,6 +85,49 @@ class Transaction {
     }
 
     /**
+     * @returns {String|Object}
+     */
+    wait() {
+        return new Promise((resolve, reject) => {
+            let timeOut = 15;
+            let time = 0;
+            let checkerInterval = setInterval(async () => {
+                time ++;
+                try {
+                    await this.getDataFromExplorer();
+
+                    if (this.data == null) {
+                        clearInterval(checkerInterval);
+                        reject('failed');
+                    } else {
+                        if (this.data.blockNumber !== null) {
+                            if (this.data.status == '0x0') {
+                                clearInterval(checkerInterval);
+                                reject('failed');
+                            } else {
+                                clearInterval(checkerInterval);
+                                resolve('success');
+                            }
+                        }
+                    }
+                } catch (error) {
+                    if (time == timeOut) {
+                        clearInterval(checkerInterval);
+                        reject(error);
+                    } else {
+                        if (error.message == 'There was a problem retrieving transaction data!') {
+                            this.wait();
+                        } else {
+                            clearInterval(checkerInterval);
+                            reject(error);
+                        }
+                    }
+                }
+            }, (1*1000));
+        });
+    }
+
+    /**
      * @param {String} tokenAddress 
      * @param {Integer} timer 
      * @returns {String|Object}

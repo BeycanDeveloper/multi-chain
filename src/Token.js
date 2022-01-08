@@ -144,11 +144,19 @@ class Token {
             amount = Utils.toHex(amount, (await this.getDecimals()));
     
             let data = this.contract.transfer.getData(to, amount, {from: this.multiChain.connectedAccount});
-    
+            
+            let gas = await this.multiChain.getEstimateGas({
+                to: this.address,
+                from: this.multiChain.connectedAccount,
+                value: '0x0',
+                data
+            });
+
             this.multiChain.connector.sendTransaction([{
                 to: this.address,
                 from: this.multiChain.connectedAccount,
                 value: '0x0',
+                gas,
                 data
             }])
             .then((transactionId) => {
@@ -156,6 +164,57 @@ class Token {
             })
             .catch((error) => {
                 reject(error);
+            });
+        });
+    }
+
+    /**
+     * @param {String} spender
+     * @param {Number} amount
+     * @returns {Boolean}
+     */
+    approve(spender, amount) {
+        return new Promise(async (resolve, reject) => {
+            amount = Utils.toHex(amount, (await this.getDecimals()));
+            
+            let data = this.contract.approve.getData(spender, amount, {from: this.multiChain.connectedAccount});
+            
+            let gas = await this.multiChain.getEstimateGas({
+                to: this.address,
+                from: this.multiChain.connectedAccount,
+                value: '0x0',
+                data
+            });
+
+            this.multiChain.connector.sendTransaction([{
+                to: this.address,
+                from: this.multiChain.connectedAccount,
+                value: '0x0',
+                gas,
+                data
+            }])
+            .then((transactionId) => {
+                resolve(transactionId);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+        });
+    }
+
+    /**
+     * @param {String} owner
+     * @param {String} spender
+     * @returns {Boolean}
+     */
+    allowance(owner, spender) {
+        return new Promise((resolve, reject) => {
+            this.contract.allowance(owner, spender, async (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(parseFloat(Utils.toDec(result, await this.getDecimals())));
+                }
             });
         });
     }

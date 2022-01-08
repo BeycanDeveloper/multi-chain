@@ -106,55 +106,28 @@ class MultiChain {
     /**
      * @var {CurrencyConverter}
      */
-    static CurrencyConverter;
+    static currencyConverter;
 
     /**
      * @var {Utils}
      */
-    static Utils;
+    static utils;
 
     /**
      * @param {Object} config 
      */
     constructor(config) {
 
-        // is browser
-        if (typeof window != 'undefined') {
-            if (window.ethereum && window.ethereum.isTrust) {
-                delete config.testnets;
-            }
-        }
-
-        // Testnets
-        if (typeof config.acceptedChains != 'undefined') {
-            this.acceptedChains = config.acceptedChains;
-        } else {
-            if (typeof config.testnets != 'undefined' && config.testnets == true) {
-                this.acceptedChains = require('../resources/testnets.json');
-            } else if (typeof config.mainnets != 'undefined' && config.mainnets == true) {
-                this.acceptedChains = require('../resources/mainnets.json');
-            }
-        }
-
-        let acceptedChains = {};
+        this.infuraId = config.infuraId;
+        this.acceptedChains = config.acceptedChains;
+        
         Object.entries(this.acceptedChains).forEach((val) => {
-            let currencies = [];
-            Object.entries(val[1].currencies).forEach((val) => {
-                currencies.push(Utils.isAddress(val[1]) ? val[1].toLowerCase() : val[1]);
-            });
-            acceptedChains[val[0]] = Object.assign(val[1], {currencies});
+            this.rpcIdMapping[val[1].id] = val[1].rpcUrl;
         });
-        this.acceptedChains = acceptedChains;
 
         if (config.acceptedWallets != undefined) {
             this.acceptedWallets = config.acceptedWallets.filter(val => this.wallets[val]);
         }
-
-        this.infuraId = config.infuraId;
-
-        Object.entries(this.acceptedChains).forEach((val) => {
-            this.rpcIdMapping[val[1].id] = val[1].rpcUrl;
-        });
 
         this.detectWallets();
     }
@@ -168,10 +141,6 @@ class MultiChain {
      */
     transfer(to, amount, currencyAddress = null) {
         return new Promise(async (resolve, reject) => {
-
-            if (currencyAddress && !this.activeChain.currencies.includes(currencyAddress)) {
-                return reject('currency-is-not-accepted');
-            }
 
             let chainHexId = await this.connector.getChainHexId();
             if (this.activeChain.hexId != chainHexId) {
@@ -251,12 +220,16 @@ class MultiChain {
     }
 
     /**
-     * @param {String} address 
      * @param {Array} abi 
+     * @param {String|null} address 
      * @return {Object}
      */
-    contract(address, abi) {
-        return this.web3.eth.contract(abi).at(address);
+    contract(abi, address = null) {
+        if (!address) {
+            return this.web3.eth.contract(abi);
+        } else {
+            return this.web3.eth.contract(abi).at(address);
+        }
     }
 
     /**
@@ -316,12 +289,31 @@ class MultiChain {
      * @returns {String|Object}
      */
     connect(wallet) {
-        return new Promise(async (resolve, reject) => {
-        
+        return new Promise((resolve, reject) => {
+            this.connectWallet(wallet)
+            .then(async (connectedAccount) => {
+                let chainHexId = await this.connector.getChainHexId();
+                if (this.acceptedChains[chainHexId]) {
+                    this.connectedAccount = connectedAccount;
+                    this.connectedWallet = this.wallets[wallet];
+                    this.activeChain = this.acceptedChains[chainHexId];
+                    resolve(connectedAccount);
+                } else {
+                    reject('not-accepted-chain');
+                }
+            })
+            .catch(error => {
+                reject(error);
+            });
+        });
+    }
+
+    connectWallet(wallet) {
+        return new Promise((resolve, reject) => {
             if (!this.wallets[wallet] || !this.acceptedWallets.includes(wallet)) {
                 return reject('not-accepted-wallet');
             }
-
+    
             if (!this.detectedWallets.includes(wallet)) {
                 return reject('wallet-not-detected');
             }
@@ -335,35 +327,38 @@ class MultiChain {
 
             this.connector.connect()
             .then(async accounts => {
-                let chainHexId = await this.connector.getChainHexId();
-                if (this.acceptedChains[chainHexId]) {
-                    this.connectedAccount = accounts[0];
-                    this.connectedWallet = this.wallets[wallet];
-                    this.activeChain = this.acceptedChains[chainHexId];
-    
-                    this.connector.chainChanged(() => {
-                        window.location.reload();
-                    });
-
-                    this.connector.accountsChanged(() => {
-                        window.location.reload();
-                    });
-
-                    this.connector.disconnectEvent(() => {
-                        window.location.reload();
-                    });
-    
-                    resolve(this.connectedAccount);
-                } else {
-                    reject('not-accepted-chain');
-                }
+                resolve(accounts[0]);
             })
             .catch(error => {
                 reject(error);
             });
-        });
+        })
     }
     
+    getGasPrice() {
+        return new Promise((resolve, reject) => {
+            this.web3.eth.getGasPrice(function(err, gasPrice) {
+                if (!err) {
+                    resolve(Utils.hex(gasPrice.toString()));
+                } else {
+                    reject(err);
+                }
+            });
+        });
+    }
+
+    getEstimateGas(data) {
+        return new Promise((resolve, reject) => {
+            this.web3.eth.estimateGas(data, function(err, gas) {
+                if (!err) {
+                    resolve(Utils.hex(gas));
+                } else {
+                    reject(err);
+                }
+            });
+        });
+    }
+
     detectWallets() {
         if (typeof window != 'undefined') {
             if (window.ethereum) {
@@ -383,8 +378,8 @@ class MultiChain {
     }
 }
 
-MultiChain.CurrencyConverter = CurrencyConverter;
-MultiChain.Utils = Utils;
+MultiChain.currencyConverter = CurrencyConverter;
+MultiChain.utils = Utils;
 
 if (typeof window != 'undefined') {
     window.MultiChain = MultiChain;

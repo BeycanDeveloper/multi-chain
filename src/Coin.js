@@ -57,10 +57,18 @@ class Coin {
                 return reject('insufficient-balance');
             }
 
-            this.multiChain.connector.sendTransaction([{
+            let gas = await this.multiChain.getEstimateGas({
                 to,
                 from: this.multiChain.connectedAccount,
                 value: Utils.toHex(amount, this.decimals)
+            });
+
+
+            this.multiChain.connector.sendTransaction([{
+                to,
+                from: this.multiChain.connectedAccount,
+                value: Utils.toHex(amount, this.decimals),
+                gas
             }])
             .then((transactionId) => {
                 resolve(transactionId);

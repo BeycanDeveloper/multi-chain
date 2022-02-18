@@ -104,6 +104,11 @@ class MultiChain {
     connectedAccount = null;
     
     /**
+     * @var {Boolean}
+     */
+    allowedNetworks = false;
+
+    /**
      * @var {CurrencyConverter}
      */
     static currencyConverter;
@@ -119,11 +124,16 @@ class MultiChain {
     constructor(config) {
 
         this.infuraId = config.infuraId;
-        this.acceptedChains = config.acceptedChains;
         
-        Object.entries(this.acceptedChains).forEach((val) => {
-            this.rpcIdMapping[val[1].id] = val[1].rpcUrl;
-        });
+        this.allowedNetworks = config.allowedNetworks ? true : false;
+
+        if (this.allowedNetworks !== true) {
+            this.acceptedChains = config.acceptedChains;
+            
+            Object.entries(this.acceptedChains).forEach((val) => {
+                this.rpcIdMapping[val[1].id] = val[1].rpcUrl;
+            });
+        }
 
         if (config.acceptedWallets != undefined) {
             this.acceptedWallets = config.acceptedWallets.filter(val => this.wallets[val]);
@@ -293,13 +303,19 @@ class MultiChain {
             this.connectWallet(wallet)
             .then(async (connectedAccount) => {
                 let chainHexId = await this.connector.getChainHexId();
-                if (this.acceptedChains[chainHexId]) {
+                if (!this.allowedNetworks) {
+                    if (this.acceptedChains[chainHexId]) {
+                        this.connectedAccount = connectedAccount;
+                        this.connectedWallet = this.wallets[wallet];
+                        this.activeChain = this.acceptedChains[chainHexId];
+                        resolve(connectedAccount);
+                    } else {
+                        reject('not-accepted-chain');
+                    }
+                } else {
                     this.connectedAccount = connectedAccount;
                     this.connectedWallet = this.wallets[wallet];
-                    this.activeChain = this.acceptedChains[chainHexId];
                     resolve(connectedAccount);
-                } else {
-                    reject('not-accepted-chain');
                 }
             })
             .catch(error => {
@@ -331,6 +347,32 @@ class MultiChain {
             })
             .catch(error => {
                 reject(error);
+            });
+        })
+    }
+
+    personalSign(message) {
+        return new Promise((resolve, reject) => {
+            this.connector.request({
+                method: 'personal_sign',
+                params: [message, this.connectedAccount],
+                from: this.connectedAccount
+            })
+            .then(signature => {
+                resolve(signature);
+            })
+            .catch(error => {
+                if (
+                    error.code == 4001 || 
+                    error.code == -32603 || 
+                    error.message == 'cancelled' || 
+                    error.message == 'User canceled' ||
+                    error.message == 'MetaMask Personal Message Signature: User denied message signature.'
+                ) {
+                    reject('signature-request-denied');
+                } else {
+                    reject('something-went-wrong');
+                }
             });
         })
     }

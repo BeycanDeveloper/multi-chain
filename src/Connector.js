@@ -53,7 +53,7 @@ class Connector {
      * @returns {Array}
      */
     getAccounts() {
-        return this.provider.request({ method: 'eth_accounts' });
+        return this.request({ method: 'eth_accounts' });
     };
 
     /**
@@ -67,7 +67,7 @@ class Connector {
      * @returns {String}
      */
     async getChainHexId() {
-        let id = await this.provider.request({method: 'eth_chainId'});
+        let id = await this.request({method: 'eth_chainId'});
         if (Utils.isNumeric(id)) return '0x' + id.toString(16);
         return id;
     };
@@ -78,18 +78,29 @@ class Connector {
     connect() {
         let connector;
         return new Promise(async (resolve, reject) => {
-            if (this.wallet == 'walletconnect') {
-                connector = this.provider.enable();
-            } else {
-                connector = this.provider.request({method: 'eth_requestAccounts'});
+            let rejectMessage = (error) => {
+                if (error.message == 'Already processing eth_requestAccounts. Please wait.') {
+                    return reject('already-processing');
+                }
+
+                return reject(error);
             }
-            
-            connector.then((accounts) => {
-                resolve(accounts);
-            })
-            .catch((error) => {
-                reject(error);
-            });
+            try {
+                if (this.wallet == 'walletconnect') {
+                    connector = this.provider.enable();
+                } else {
+                    connector = this.request({method: 'eth_requestAccounts'});
+                }
+                
+                connector.then((accounts) => {
+                    resolve(accounts);
+                })
+                .catch((error) => {
+                    rejectMessage(error);
+                });
+            } catch (error) {
+                rejectMessage(error);
+            }
         });
     };
 
@@ -108,7 +119,7 @@ class Connector {
      */
     sendTransaction(params) {
         return new Promise(async (resolve, reject) => {
-            this.provider.request({
+            this.request({
                 method: 'eth_sendTransaction',
                 params,
             })

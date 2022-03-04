@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const wpdir = "C:/wamp64/www/projects/wp-development/products/wp-content/plugins/tokenico/assets/js";
+const wpdir = "C:/wamp64/www/projects/wp-development/products/wp-content/plugins/cryptopay-woocommerce/assets/js";
 const dist = path.join(__dirname, "/dist");
 
 let env = 'prod';
@@ -21,10 +21,9 @@ let prod = {
     mode: 'production',
     entry: './index.js',
     output: {
-        path: wpdir,
+        path: dist,
         filename: 'multi-chain.min.js',
-    },
-    devtool: "source-map"
+    }
 };
 
 module.exports = Object.assign(env == 'prod' ? prod : dev, {

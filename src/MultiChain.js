@@ -157,6 +157,10 @@ class MultiChain {
                 return reject('chain-changed');
             }
 
+            if (parseFloat(amount) < 0) {
+                return reject('transfer-amount-error');
+            }
+
             if (currencyAddress == this.activeChain.nativeCurrency.symbol) {
                 currencyAddress = null;
             }

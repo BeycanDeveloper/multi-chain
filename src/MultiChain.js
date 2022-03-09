@@ -194,9 +194,9 @@ class MultiChain {
      * @throws {Error}
      */
     tokenTransfer(to, amount, tokenAddress) {
-        this.validate(to, amount, tokenAddress);
         return new Promise((resolve, reject) => {
             try {
+                this.validate(to, amount, tokenAddress);
                 (new Token(tokenAddress, this)).transfer(to, amount)
                 .then((transactionId) => {
                     resolve(new Transaction(transactionId, this));
@@ -217,9 +217,9 @@ class MultiChain {
      * @throws {Error}
      */
     coinTransfer(to, amount) {
-        this.validate(to, amount);
         return new Promise((resolve, reject) => {
             try {
+                this.validate(to, amount);
                 (new Coin(this)).transfer(to, amount)
                 .then((transactionId) => {
                     resolve(new Transaction(transactionId, this));

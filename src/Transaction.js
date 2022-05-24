@@ -250,14 +250,10 @@ class Transaction {
     verifyWithData(receiver, amount, tokenAddress = null) {
         return new Promise((resolve, reject) => {
             this.verify(tokenAddress)
-            .then(async (result) => {
+            .then(async () => {
+                result = await this.verifyData(receiver, amount, tokenAddress);
                 if (result = 'verified') {
-                    result = this.verifyData(receiver, amount, tokenAddress);
-                    if (result = 'verified') {
-                        resolve('verified');
-                    } else {
-                        reject('failed');
-                    }
+                    resolve('verified');
                 } else {
                     reject('failed');
                 }
@@ -269,10 +265,9 @@ class Transaction {
     }
 
     /**
-     * @param {String} receiver
      * @returns {String}
      */
-    getTransactionUrl() {
+    getUrl() {
         let explorerUrl = this.multiChain.activeChain.explorerUrl;
         explorerUrl += explorerUrl.endsWith('/') ? '' : '/';
         explorerUrl += 'tx/'+this.id;

@@ -5,7 +5,6 @@ const Utils = require('./Utils');
 const Connector = require('./Connector');
 const Web3Utils = require('web3-utils');
 const Transaction = require('./Transaction');
-const CurrencyConverter = require('./CurrencyConverter');
 
 class MultiChain {
 
@@ -85,9 +84,6 @@ class MultiChain {
         },
         coin98wallet: {
             name: 'Coin98 Wallet'
-        },
-        phantom: {
-            name: 'Phantom'
         }
     };
 
@@ -157,10 +153,6 @@ class MultiChain {
                 return reject('chain-changed');
             }
 
-            if (parseFloat(amount) < 0) {
-                return reject('transfer-amount-error');
-            }
-
             if (currencyAddress == this.activeChain.nativeCurrency.symbol) {
                 currencyAddress = null;
             }
@@ -199,7 +191,7 @@ class MultiChain {
                 this.validate(to, amount, tokenAddress);
                 (new Token(tokenAddress, this)).transfer(to, amount)
                 .then((transactionId) => {
-                    resolve(new Transaction(transactionId, this));
+                    resolve(this.transaction(transactionId));
                 })
                 .catch((error) => {
                     reject(error);
@@ -222,7 +214,7 @@ class MultiChain {
                 this.validate(to, amount);
                 (new Coin(this)).transfer(to, amount)
                 .then((transactionId) => {
-                    resolve(new Transaction(transactionId, this));
+                    resolve(this.transaction(transactionId));
                 })
                 .catch((error) => {
                     reject(error);
@@ -424,11 +416,8 @@ class MultiChain {
     }
 }
 
-MultiChain.currencyConverter = CurrencyConverter;
 MultiChain.utils = Utils;
 
-if (typeof window != 'undefined') {
-    window.MultiChain = MultiChain;
-}
+window.MultiChain = MultiChain;
 
 module.exports = MultiChain;

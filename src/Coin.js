@@ -57,6 +57,10 @@ class Coin {
                 return reject('insufficient-balance');
             }
 
+            if (parseFloat(amount) < 0) {
+                return reject('transfer-amount-error');
+            }
+
             let gas = await this.multiChain.getEstimateGas({
                 to,
                 from: this.multiChain.connectedAccount,

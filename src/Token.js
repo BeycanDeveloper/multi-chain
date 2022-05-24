@@ -140,11 +140,17 @@ class Token {
             if (parseFloat(amount) > await this.getBalance(this.multiChain.connectedAccount)) {
                 return reject('insufficient-balance');
             }
+
+            if (parseFloat(amount) < 0) {
+                return reject('transfer-amount-error');
+            }
             
             amount = Utils.toHex(amount, (await this.getDecimals()));
-    
+
             let data = this.contract.transfer.getData(to, amount, {from: this.multiChain.connectedAccount});
             
+            let gasPrice = await this.multiChain.getGasPrice();
+
             let gas = await this.multiChain.getEstimateGas({
                 to: this.address,
                 from: this.multiChain.connectedAccount,
@@ -157,6 +163,7 @@ class Token {
                 from: this.multiChain.connectedAccount,
                 value: '0x0',
                 gas,
+                gasPrice,
                 data
             }])
             .then((transactionId) => {

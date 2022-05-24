@@ -23,7 +23,6 @@ class Utils {
         let length = '1' + '0'.repeat(decimals);
         let value = new BigNumber(amount.toString(10), 10).times(length);
         return Web3Utils.toHex(value.toString(10));
-
     }
 
     /**

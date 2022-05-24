@@ -79,7 +79,10 @@ class Connector {
         let connector;
         return new Promise(async (resolve, reject) => {
             let rejectMessage = (error) => {
-                if (error.message == 'Already processing eth_requestAccounts. Please wait.') {
+                if (
+                    error.message == 'Already processing eth_requestAccounts. Please wait.' || 
+                    error.code == -32002    
+                ) {
                     return reject('already-processing');
                 }
 

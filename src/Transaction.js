@@ -251,7 +251,7 @@ class Transaction {
         return new Promise((resolve, reject) => {
             this.verify(tokenAddress)
             .then(async () => {
-                result = await this.verifyData(receiver, amount, tokenAddress);
+                let result = await this.verifyData(receiver, amount, tokenAddress);
                 if (result = 'verified') {
                     resolve('verified');
                 } else {

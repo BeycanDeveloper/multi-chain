@@ -42,6 +42,7 @@ class Connector {
                 throw new Error('not-found-infura-id');
             } else {
                 this.provider = new WalletConnectProvider({
+                    qrcodeModalOptions: {desktopLinks: []},
                     rpc: this.multiChain.rpcIdMapping,
                     infuraId: this.multiChain.infuraId
                 });

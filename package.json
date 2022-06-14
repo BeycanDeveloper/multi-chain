@@ -1,6 +1,6 @@
 {
   "namespace": "beycandeveloper",
-  "name": "@beycandeveloper/multi-chain-old",
+  "name": "@beycandeveloper/multi-chain",
   "version": "1.3.2",
   "description": "A library that allows you to easily connect and transact with many blockchain networks and wallets.",
   "main": "index.js",
